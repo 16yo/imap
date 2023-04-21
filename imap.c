@@ -1,13 +1,13 @@
 #include "imap.h"
 
-imap_item* new_imap_item(int64_t id, int64_t value, const imap_item* prev, const imap_item* next) {
+imap_item* new_imap_item(int64_t id, int64_t value, imap_item* const prev, imap_item* const next) {
     imap_item* i = (imap_item*)malloc(sizeof(imap_item));
     i->id = id; i->value = value;
     i->prev = prev;
     i->next = next;
 }
 
-imap_item* copy_imap_item(const imap_item* i) {
+imap_item* copy_imap_item(imap_item* const i) {
     return new_imap_item(i->id, i->value, i->prev, i->next);
 }
 
@@ -19,10 +19,10 @@ imap create_empty_imap() {
     return m;
 }
 
-int64_t imap_at(const imap* m, int64_t id) {
+int64_t imap_at(imap* const m, int64_t id) {
     imap_item* iterator = m->begin;
     if (iterator == NULL) {
-        exception_exit("imap begin is NULL poiner\n");
+        exception_exit("imap at address \'%p\' begin is NULL\n", m);
     }
     while (!(iterator == NULL) && iterator->id != id) {
         iterator = iterator->next;
@@ -30,7 +30,7 @@ int64_t imap_at(const imap* m, int64_t id) {
     if (!(iterator == NULL) && iterator->id == id) {
         return iterator->value;
     }
-    exception_exit("No element with given id in imap\n");
+    exception_exit("No element with id \'%ld\' in imap at address \'%p\'\n", id, m);
 }
 
 void imap_add(imap* m, int64_t id, int64_t value) {
@@ -41,10 +41,10 @@ void imap_add(imap* m, int64_t id, int64_t value) {
         return;
     }
     if (m->begin == NULL) {
-        exception_exit("Bad imap: imap.begin == NULL\n");
+        exception_exit("Bad imap: imap at address \'%p\' begin is NULL\n", m);
     }
     if (m->back == NULL) {
-        exception_exit("Bad imap: imap.back == NULL\n");
+        exception_exit("Bad imap: imap at address \'%p\' back is NULL\n", m);
     }
     imap_item* iterator = m->begin;
     while(!(iterator->next == NULL) && (i->id > iterator->id)) {
@@ -111,9 +111,9 @@ void imap_remove_by_value(imap* m, int64_t value) {
     }
 }
 
-void imap_copy(imap* m, const imap* m_) {
+void imap_copy(imap* m, imap* const m_) {
     if (!is_valid_edges(m)) {
-        exception_exit("Not valid imap to copy\n");
+        exception_exit("imap \'%p\' is not valid to copy\n", m);
     }
     clear_imap(m);
     imap_item* iterator_ = m_->begin;
@@ -127,11 +127,11 @@ void imap_copy(imap* m, const imap* m_) {
     m->back = iterator;
 }
 
-int8_t is_valid_edges(const imap* m) {
+int8_t is_valid_edges(imap* const m) {
     return !((m->begin == NULL || m->back == NULL) && !(m->begin == m->back));
 }
 
-int8_t is_valid(const imap* m) {
+int8_t is_valid(imap* const m) {
     if (!is_valid_edges(m)) {
         return 0;
     }
@@ -192,6 +192,6 @@ void clear_imap(imap* m) {
     m->size = 0;
 }
 
-int8_t is_empty_imap(const imap* m) {
+int8_t is_empty_imap(imap* const m) {
     return m->begin == m->back && m->back == NULL;
 }
